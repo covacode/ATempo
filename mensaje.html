@@ -6,46 +6,83 @@
     <title>ATempo | Cronómetro</title>
     <link rel="stylesheet" href="fontawesome/css/all.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <h1 class="text-center mt-5"><i class="far fa-clock"></i> ATempo</h1>
-    <div class="container mt-5 text-center">
-        <label id="countdown" class="display-1"></label>
-        <div class="mt-4">
-            <label id="display-message" class="h2 text-danger"></label>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const countdownLabel = document.getElementById('countdown');
-        const displayMessage = document.getElementById('display-message');
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
 
-        let timer = localStorage.getItem('timer');
-        let message = localStorage.getItem('message');
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWWsVzpfPYQmjNa5kW_5_7FmwM9wjQX3Q",
+            authDomain: "atempo-sacb.firebaseapp.com",
+            projectId: "atempo-sacb",
+            storageBucket: "atempo-sacb.appspot.com",
+            messagingSenderId: "954859089085",
+            appId: "1:954859089085:web:f79f743bbd836eed7d1bd4",
+            databaseURL: "https://atempo-sacb-default-rtdb.firebaseio.com/"
+        };
 
-        if (message) {
-            displayMessage.textContent = message;
-        }
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-        if (timer) {
-            let timeLeft = timer * 60; // Convertir minutos a segundos
+        document.addEventListener('DOMContentLoaded', () => {
+            // Referencias a los nodos en la base de datos
+            const messagesRef = ref(database, 'messages');
+            const timerRef = ref(database, 'timer');
 
-            const countdownInterval = setInterval(() => {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
+            // Mostrar mensajes en tiempo real
+            onValue(messagesRef, (snapshot) => {
+                const messages = snapshot.val();
+                const messageDisplay = document.getElementById('message-display');
+                messageDisplay.innerHTML = '';
 
-                countdownLabel.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                for (const key in messages) {
+                    if (messages.hasOwnProperty(key)) {
+                        messageDisplay.innerHTML += `<p>${messages[key]}</p>`;
+                    }
+                }
+            });
 
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    countdownLabel.textContent = 'Tiempo terminado';
+            // Actualizar cronómetro en tiempo real
+            let timerInterval;
+            function updateTimer(minutes) {
+                const endTime = Date.now() + minutes * 60000;
+
+                function displayTime() {
+                    const remainingTime = endTime - Date.now();
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        document.getElementById('timer-display').textContent = '00:00';
+                    } else {
+                        const minutesLeft = Math.floor(remainingTime / 60000);
+                        const secondsLeft = Math.floor((remainingTime % 60000) / 1000);
+                        document.getElementById('timer-display').textContent = 
+                            `${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+                    }
                 }
 
-                timeLeft--;
-            }, 1000);
-        } else {
-            countdownLabel.textContent = 'No se ha establecido un temporizador.';
-        }
+                displayTime(); // Inicializar la visualización del tiempo
+                timerInterval = setInterval(displayTime, 1000); // Actualizar cada segundo
+            }
+
+            onValue(timerRef, (snapshot) => {
+                const minutes = snapshot.val();
+                if (minutes) {
+                    updateTimer(minutes);
+                } else {
+                    document.getElementById('timer-display').textContent = '00:00';
+                }
+            });
+        });
     </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center"><i class="far fa-clock"></i> ATempo</h1>
+        <div class="text-center mb-4 mt-5">
+            <p id="message-display" class="h3 text-danger">Esperando mensaje...</p>
+            <strong id="timer-display" class="h1">00:00</strong>
+        </div>
+    </div>
 </body>
 </html>
