@@ -30,18 +30,21 @@
             const messagesRef = ref(database, 'messages');
             const timerRef = ref(database, 'timer');
 
-            // Mostrar mensajes en tiempo real
+            // Mostrar solo el último mensaje en tiempo real
             onValue(messagesRef, (snapshot) => {
                 const messages = snapshot.val();
                 const messageDisplay = document.getElementById('message-display');
                 messageDisplay.innerHTML = '';
 
-                for (const key in messages) {
-                    if (messages.hasOwnProperty(key)) {
-                        messageDisplay.innerHTML += `<p>${messages[key]}</p>`;
-                    }
+                if (messages) {
+                    // Obtener el último mensaje
+                    const keys = Object.keys(messages);
+                    const lastKey = keys[keys.length - 1];
+                    const lastMessage = messages[lastKey];
+                    messageDisplay.innerHTML = `<p>${lastMessage}</p>`;
                 }
             });
+
 
             // Actualizar cronómetro en tiempo real
             let timerInterval;

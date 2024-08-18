@@ -32,8 +32,7 @@
 
             // Configurar temporizador
             document.getElementById('set-timer-btn').addEventListener('click', () => {
-                let timerValor = document.getElementById('timer').value;
-                const timerValue = parseInt(timerValor);
+                const timerValue = document.getElementById('timer').value;
                 set(timerRef, timerValue)
                     .then(() => alert('Temporizador establecido a ' + timerValue + ' minutos'))
                     .catch(error => console.error('Error al establecer temporizador:', error));
@@ -54,24 +53,82 @@
                     .then(() => alert('Cronómetro y mensaje reiniciados.'))
                     .catch(error => console.error('Error al reiniciar datos:', error));
             });
+
+            // Mostrar mensajes en tiempo real
+            onValue(messagesRef, (snapshot) => {
+                const messages = snapshot.val();
+                const messageDisplay = document.getElementById('message-display');
+                messageDisplay.innerHTML = '';
+
+                for (const key in messages) {
+                    if (messages.hasOwnProperty(key)) {
+                        messageDisplay.innerHTML += `<p>${messages[key]}</p>`;
+                    }
+                }
+            });
+
+            // Actualizar cronómetro en tiempo real
+            let timerInterval;
+            function updateTimer(minutes) {
+                const endTime = Date.now() + minutes * 60000;
+
+                function displayTime() {
+                    const remainingTime = endTime - Date.now();
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        document.getElementById('timer-display').textContent = '00:00';
+                    } else {
+                        const minutesLeft = Math.floor(remainingTime / 60000);
+                        const secondsLeft = Math.floor((remainingTime % 60000) / 1000);
+                        document.getElementById('timer-display').textContent = 
+                            `${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+                    }
+                }
+
+                displayTime(); // Inicializar la visualización del tiempo
+                timerInterval = setInterval(displayTime, 1000); // Actualizar cada segundo
+            }
+
+            onValue(timerRef, (snapshot) => {
+                const minutes = snapshot.val();
+                if (minutes) {
+                    updateTimer(minutes);
+                } else {
+                    document.getElementById('timer-display').textContent = '00:00';
+                }
+            });
         });
     </script>
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center"><i class="far fa-clock"></i> ATempo</h1>
-        <div class="mb-5">
-            <strong for="timer" class="form-label">Temporizador en minutos</strong>
-            <input type="number" class="form-control" id="timer" placeholder="Ingrese los minutos">
-            <button id="set-timer-btn" class="btn btn-success mt-2">Enviar</button>
-        </div>
-        <div class="mb-3">
-            <strong for="message" class="form-label">Mensaje</strong>
-            <textarea class="form-control" id="message" rows="3" placeholder="Escriba su mensaje"></textarea>
-            <button id="send-message-btn" class="btn btn-success mt-2">Enviar</button>
-        </div>
-        <div class="text-center">
-            <button id="reset-btn" class="btn btn-danger mt-4">Reiniciar</button>
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong for="timer" class="form-label">Temporizador en minutos</strong>
+                    <input type="number" class="form-control" id="timer" placeholder="Ingrese los minutos">
+                    <button id="set-timer-btn" class="btn btn-success mt-2">Enviar</button>
+                </div>
+                <div class="mb-3 mt-3">
+                    <strong for="message" class="form-label">Mensaje</strong>
+                    <textarea class="form-control" id="message" rows="3" placeholder="Escriba su mensaje"></textarea>
+                    <button id="send-message-btn" class="btn btn-success mt-2">Enviar</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mt-3">
+                    <h2>Temporizador</h2>
+                    <div id="timer-display">00:00</div>
+                </div>
+                <div class="mb-3 mt-3">
+                    <h2>Mensajes Enviados</h2>
+                    <div id="message-display" class="border p-3 mb-3">Esperando mensaje...</div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button id="reset-btn" class="btn btn-danger mt-4">Reiniciar</button>
+            </div>
         </div>
     </div>
 </body>
