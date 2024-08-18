@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getDatabase, ref, set, push, remove } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+        import { getDatabase, set, push, remove, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
 
         // Configuración de Firebase
         const firebaseConfig = {
@@ -27,13 +27,13 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // Referencias a los nodos en la base de datos
-            const timerRef = ref(database, 'timer');
             const messagesRef = ref(database, 'messages');
+            const timerRef = ref(database, 'timer');
 
-            // Configurar temporizador
             document.getElementById('set-timer-btn').addEventListener('click', () => {
                 const timerValue = document.getElementById('timer').value;
-                set(timerRef, timerValue)
+                remove(timerRef)
+                push(timerRef, timerValue)
                     .then(() => alert('Temporizador establecido a ' + timerValue + ' minutos'))
                     .catch(error => console.error('Error al establecer temporizador:', error));
             });
@@ -50,11 +50,16 @@
             document.getElementById('reset-btn').addEventListener('click', () => {
                 remove(timerRef)
                     .then(() => remove(messagesRef))
-                    .then(() => alert('Cronómetro y mensaje reiniciados.'))
+                    .then(() => {
+                        alert('Cronómetro y mensaje reiniciados.')
+                        if (timerInterval) {
+                            clearInterval(timerInterval); // Limpiar intervalo del temporizador
+                        }
+                    })
                     .catch(error => console.error('Error al reiniciar datos:', error));
             });
 
-            // Mostrar mensajes en tiempo real
+            // Mostrar solo el último mensaje en tiempo real
             onValue(messagesRef, (snapshot) => {
                 const messages = snapshot.val();
                 const messageDisplay = document.getElementById('message-display');
@@ -71,6 +76,10 @@
             let timerInterval;
             function updateTimer(minutes) {
                 const endTime = Date.now() + minutes * 60000;
+
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
 
                 function displayTime() {
                     const remainingTime = endTime - Date.now();
@@ -91,9 +100,16 @@
 
             onValue(timerRef, (snapshot) => {
                 const minutes = snapshot.val();
+                const minutesDisplay = document.getElementById('timer-display');
+                minutesDisplay.textContent = '00:00';
+
                 if (minutes) {
-                    updateTimer(minutes);
-                } else {
+                    // Obtener el último mensaje
+                    const keys = Object.keys(minutes);
+                    const lastKey = keys[keys.length - 1];
+                    const lastTimer = minutes[lastKey];
+                    updateTimer(lastTimer);
+                }else{
                     document.getElementById('timer-display').textContent = '00:00';
                 }
             });
