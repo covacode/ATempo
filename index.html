@@ -58,6 +58,8 @@
             document.getElementById('reset-btn').addEventListener('click', () => {
                 remove(timerRef)
                     .then(() => remove(messagesRef))
+                    .then(() => push(messagesRef, ''))
+                    .then(() => push(timerRef, 10))
                     .then(() => {
                         Swal.fire({
                             title: "Reinicio exitoso!",
@@ -152,7 +154,7 @@
                 <div class="mb-3">
                     <strong for="message" class="form-label">Temporizador</strong>
                     <div class="input-group">
-                        <div id="timer-display" class="form-control ms-3 text-center">00:00</div>
+                        <label id="timer-display" class="form-control ms-3 text-center">00:00</label>
                     </div>
                 </div>
                 <div class="mb-3">

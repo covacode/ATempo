@@ -11,10 +11,10 @@ body {
     padding: 15px;
 }
 #timer-display {
-    font-size: 4rem; /* Tamaño del temporizador */
+    font-size: 6rem; /* Tamaño del temporizador */
 }
 #message-display {
-    font-size: 2rem; /* Tamaño del mensaje */
+    font-size: 3rem; /* Tamaño del mensaje */
 }
 @media (max-width: 576px) {
     #timer-display {
@@ -23,4 +23,9 @@ body {
     #message-display {
         font-size: 1.5rem; /* Ajuste del tamaño del mensaje en pantallas más pequeñas */
     }
+}
+
+#timer-display.text-danger-custom {
+    color: #dc3545; /* Color rojo de Bootstrap */
+    font-size: 8rem;
 }

@@ -44,6 +44,7 @@
             let timerInterval;
             function updateTimer(minutes) {
                 const endTime = Date.now() + minutes * 60000;
+                const timerDisplay = document.getElementById('timer-display');
 
                 if (timerInterval) {
                     clearInterval(timerInterval);
@@ -53,12 +54,14 @@
                     const remainingTime = endTime - Date.now();
                     if (remainingTime <= 0) {
                         clearInterval(timerInterval);
-                        document.getElementById('timer-display').textContent = '00:00';
+                        timerDisplay.textContent = '00:00';
+                        timerDisplay.classList.add('text-danger-custom');
                     } else {
                         const minutesLeft = Math.floor(remainingTime / 60000);
                         const secondsLeft = Math.floor((remainingTime % 60000) / 1000);
-                        document.getElementById('timer-display').textContent = 
+                        timerDisplay.textContent =
                             `${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+                        timerDisplay.classList.remove('text-danger-custom');
                     }
                 }
 
@@ -68,8 +71,9 @@
 
             onValue(timerRef, (snapshot) => {
                 const minutes = snapshot.val();
-                const minutesDisplay = document.getElementById('timer-display');
-                minutesDisplay.textContent = '00:00';
+                const timerDisplay = document.getElementById('timer-display');
+                timerDisplay.textContent = '00:00';
+                timerDisplay.classList.remove('text-danger-custom');
 
                 if (minutes) {
                     // Obtener el último mensaje
@@ -79,7 +83,7 @@
                     updateTimer(lastTimer);
                 }
                 else{
-                    document.getElementById('timer-display').textContent = '00:00';
+                    timerDisplay.textContent = '00:00';
                 }
             });
 
@@ -93,7 +97,7 @@
         </h1>
         <div class="mb-4">
             <strong id="timer-display">00:00</strong>
-            <p id="message-display" class="text-danger">Esperando mensaje...</p>
+            <p id="message-display" class="text-danger"></p>
         </div>
     </div>
 </body>
