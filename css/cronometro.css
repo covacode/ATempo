@@ -1,0 +1,26 @@
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f8f9fa;
+}
+.container {
+    max-width: 100%;
+    padding: 15px;
+}
+#timer-display {
+    font-size: 4rem; /* Tamaño del temporizador */
+}
+#message-display {
+    font-size: 2rem; /* Tamaño del mensaje */
+}
+@media (max-width: 576px) {
+    #timer-display {
+        font-size: 3rem; /* Ajuste del tamaño del temporizador en pantallas más pequeñas */
+    }
+    #message-display {
+        font-size: 1.5rem; /* Ajuste del tamaño del mensaje en pantallas más pequeñas */
+    }
+}
