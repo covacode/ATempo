@@ -1,6 +1,6 @@
 body {
     display: flex;
-    align-items: center;
+    align-items: normal;
     justify-content: center;
     min-height: 100vh;
     margin: 0;
@@ -11,7 +11,7 @@ body {
     padding: 15px;
 }
 #timer-display {
-    font-size: 5rem; /* Tamaño del temporizador */
+    font-size: 3rem; /* Tamaño del temporizador */
 }
 #message-display {
     font-size: 3rem; /* Tamaño del mensaje */
@@ -27,5 +27,5 @@ body {
 
 #timer-display.text-danger-custom {
     color: #dc3545; /* Color rojo de Bootstrap */
-    font-size: 7rem;
+    font-size: 5rem;
 }
